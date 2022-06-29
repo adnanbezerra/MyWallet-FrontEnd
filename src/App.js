@@ -9,7 +9,6 @@ import TelaExtrato from './Components/TelaExtrato';
 function App() {
   return (
     <>
-
       <GlobalStyle />
 
       <BrowserRouter>

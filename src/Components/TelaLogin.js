@@ -21,8 +21,8 @@ export default function TelaLogin() {
         axios.post('http://localhost:5000/login', login)
             .then(response => {
                 setDisable(false);
-                const user = response.data;
-                localStorage.setItem("token", user.token);
+                const loginUser = response.body;
+                localStorage.setItem("user", loginUser)
                 navigate('/extrato');
             })
             .catch(error => {
@@ -36,10 +36,10 @@ export default function TelaLogin() {
         <Container>
             <PageTitle>MyWallet</PageTitle>
 
-            <Form>
+            <Form onSubmit={submitForm}>
                 <Input placeholder='E-mail' type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                 <Input placeholder='Senha' type="password" value={senha} onChange={(e) => setSenha(e.target.value)} />
-                <Button disabled={disable} onClick={submitForm}>
+                <Button disabled={disable}>
                     {disable ? <ThreeDots color="white" height={80} width={50} />
                         : "Entrar"}
                 </Button>
@@ -50,7 +50,7 @@ export default function TelaLogin() {
     )
 }
 
-const Form = styled.div`
+const Form = styled.form`
     width: 100%;
     display: flex;
     justify-content: center;

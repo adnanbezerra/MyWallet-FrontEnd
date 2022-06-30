@@ -1,10 +1,13 @@
 import axios from 'axios';
 import styled from 'styled-components';
 import { ThreeDots } from 'react-loader-spinner';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import UserContext from './contexts/UserContext';
 
 export default function TelaLogin() {
+
+    const {setUser} = useContext(UserContext);
 
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
@@ -21,14 +24,20 @@ export default function TelaLogin() {
         axios.post('http://localhost:5000/login', login)
             .then(response => {
                 setDisable(false);
-                const loginUser = response.body;
-                localStorage.setItem("user", loginUser)
+
+                const loginUser = response.data;
+
+                setUser(loginUser);
+
                 navigate('/extrato');
             })
             .catch(error => {
+                console.log("deu erro")
                 setDisable(false);
-                if(error.response.status === 422) alert("Preencha todos os dados para fazer login!");
-                if(error.response.status === 404||error.response.status === 401) alert("Email ou senha errados!");  
+                if (error.response) {
+                    if (error.response.status === 422) alert("Preencha todos os dados para fazer login!");
+                    if (error.response.status === 404 || error.response.status === 401) alert("Email ou senha errados!");
+                }
             })
     }
 

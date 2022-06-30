@@ -5,10 +5,15 @@ import TelaCadastro from './Components/TelaCadastro';
 import TelaEntrada from './Components/TelaEntrada';
 import TelaSaida from './Components/TelaSaida';
 import TelaExtrato from './Components/TelaExtrato';
+import UserContext from './Components/contexts/UserContext';
+import { useState } from 'react';
 
 function App() {
+
+  const [user, setUser] = useState()
+
   return (
-    <>
+    <UserContext.Provider value={{user, setUser}}>
       <GlobalStyle />
 
       <BrowserRouter>
@@ -21,7 +26,7 @@ function App() {
 
         </Routes>
       </BrowserRouter>
-    </>
+    </UserContext.Provider>
   );
 }
 

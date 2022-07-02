@@ -32,7 +32,6 @@ export default function TelaLogin() {
                 navigate('/extrato');
             })
             .catch(error => {
-                console.log("deu erro")
                 setDisable(false);
                 if (error.response) {
                     if (error.response.status === 422) alert("Preencha todos os dados para fazer login!");

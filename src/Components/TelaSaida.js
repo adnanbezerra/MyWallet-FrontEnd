@@ -4,20 +4,23 @@ import { useState, useContext } from "react"
 import styled from "styled-components"
 import UserContext from './contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
+import { ThreeDots } from 'react-loader-spinner';
 
 export default function TelaSaida() {
 
     const { user } = useContext(UserContext);
     const [valor, setValor] = useState("");
     const [descricao, setDescricao] = useState("");
+    const [disable, setDisable] = useState(false);
 
     const navigate = useNavigate();
 
     function submitForm(event) {
         event.preventDefault();
 
+        setDisable(true);
+
         const data = dayjs().format("DD/MM")
-        console.log(data)
 
         const token = user.token;
         const content = {
@@ -27,16 +30,18 @@ export default function TelaSaida() {
             data
         }
 
-        axios.post('http://localhost:5000/extrato', content, {
+        axios.post('https://mywallet-backend-adnan.herokuapp.com/extrato', content, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         })
             .then(response => {
+                setDisable(false);
                 alert("Cadastro feito com sucesso!");
                 navigate("/extrato");
             })
             .catch(error => {
+                setDisable(false);
                 alert("Falha no cadastro! Tente novamente.")
                 console.log(error);
             })
@@ -48,7 +53,7 @@ export default function TelaSaida() {
             <Form onSubmit={submitForm}>
                 <FormInput placeholder="Valor" type='text' value={valor} onChange={e => setValor(e.target.value)} />
                 <FormInput placeholder="Descrição" type='text' value={descricao} onChange={e => setDescricao(e.target.value)} />
-                <Button>Salvar saída</Button>
+                <Button>{disable ? <ThreeDots color="white" height={80} width={50} /> : "Salvar saída"}</Button>
             </Form>
         </Container>
     )

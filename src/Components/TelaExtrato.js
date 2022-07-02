@@ -11,43 +11,40 @@ export default function TelaExtrato() {
 
     const { user } = useContext(UserContext);
     const [balance, setBalance] = useState([]);
-    const [saldo, setSaldo] = useState(0);
 
     useEffect(() => {
         const token = user.token;
 
-        axios.get('http://localhost:5000/extrato', {
+        axios.get('https://mywallet-backend-adnan.herokuapp.com/extrato', {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         })
             .then(response => {
                 setBalance(response.data);
-                getSaldo();
-                console.log(balance);
-                console.log(saldo);
             }).catch(error => {
                 console.log(error);
             })
     }, [])
 
     function getSaldo() {
+        let novoValor = 0;
+
         for (let i = 0; i < balance.length; i++) {
             if (balance[i].tipo === 'saida') {
-                const valor = balance[i].valor * -1;
-                const novoValor = saldo + valor;
-                setSaldo(novoValor);
+                novoValor += (balance[i].valor * - 1);
             } else {
-                const novoValor = saldo + balance[i].valor;
-                setSaldo(novoValor);
+                novoValor += balance[i].valor;
             }
         }
+
+        return novoValor;
     }
 
     function logOut() {
         const token = user.token;
 
-        axios.delete('http://localhost:5000/logoff', {
+        axios.delete('https://mywallet-backend-adnan.herokuapp.com/logoff', {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -61,14 +58,16 @@ export default function TelaExtrato() {
     function generateBalanceDisplay() {
         return (
             <Display>
-                {balance.map(entry => {
-                    return (
-                        <ExpensesRow>
-                            <div><Data>{entry.data}</Data><Descricao>{entry.descricao}</Descricao></div>
-                            <div><Valor negativo={entry.tipo === 'saida'}>{entry.valor}</Valor></div>
-                        </ExpensesRow>)
-                })}
-                <BalanceRow><Balance>SALDO</Balance><BalanceValue negativo={saldo < 0}>{saldo}</BalanceValue></BalanceRow>
+                <ExpensesRow>
+                    {balance.map(entry => {
+                        return (
+                            <Trem>
+                                <div><Data>{entry.data}</Data><Descricao>{entry.descricao}</Descricao></div>
+                                <Valor negativo={entry.tipo === 'saida'}>{entry.valor}</Valor>
+                            </Trem>)
+                    })}
+                </ExpensesRow>
+                <BalanceRow><Balance>SALDO</Balance><BalanceValue negativo={getSaldo() < 0}>{getSaldo()}</BalanceValue></BalanceRow>
             </Display>
         )
     }
@@ -103,6 +102,12 @@ export default function TelaExtrato() {
     )
 }
 
+const Trem = styled.div`
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+`
+
 const Valor = styled.span`
     color: ${props => props.negativo ? "#C70000" : "#03AC00"};
     font-size: 16px;
@@ -122,9 +127,10 @@ const Data = styled.span`
     margin-right: 8px;
 `
 
-const ExpensesRow = styled.p`
+const ExpensesRow = styled.div`
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    width: 100%;
 `
 
 const BalanceValue = styled.p`

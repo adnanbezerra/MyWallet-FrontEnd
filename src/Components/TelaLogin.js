@@ -21,7 +21,7 @@ export default function TelaLogin() {
         setDisable(true);
         const login = { email, senha };
 
-        axios.post('http://localhost:5000/login', login)
+        axios.post('https://mywallet-backend-adnan.herokuapp.com/login', login)
             .then(response => {
                 setDisable(false);
 

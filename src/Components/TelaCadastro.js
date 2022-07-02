@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import styled from "styled-components"
+import { ThreeDots } from 'react-loader-spinner';
 
 export default function TelaCadastro() {
 
@@ -9,10 +10,12 @@ export default function TelaCadastro() {
     const [nome, setNome] = useState("");
     const [senha, setSenha] = useState("");
     const [confirma, setConfirma] = useState("");
+    const [disable, setDisable] = useState(false);
 
     const navigate = useNavigate();
 
     function submitForm(event) {
+        setDisable(true);
         event.preventDefault();
 
         if(senha !== confirma) {
@@ -26,11 +29,13 @@ export default function TelaCadastro() {
             senha
         }
 
-        axios.post('http://localhost:5000/cadastro', cadastro)
+        axios.post('https://mywallet-backend-adnan.herokuapp.com/cadastro', cadastro)
             .then( response => {
                 alert("Cadastro feito com sucesso!");
+                setDisable(false);
                 navigate("/");
             }).catch( error => {
+                setDisable(false);
                 if(error.response) {
                     if(error.response.status === 422) alert("Dados inválidos! Tente novamente.");
                     if(error.response.status === 409) alert("Usuário já cadastrado.");
@@ -48,7 +53,7 @@ export default function TelaCadastro() {
                 <FormInput placeholder='E-mail' type='text' value={email} onChange={e => setEmail(e.target.value)} />
                 <FormInput placeholder='Senha' type='password' value={senha} onChange={e => setSenha(e.target.value)} />
                 <FormInput placeholder='Confirme a senha' type='password' value={confirma} onChange={ e => setConfirma(e.target.value)} />
-                <Button>Cadastrar</Button>
+                <Button>{disable ? <ThreeDots color="white" height={80} width={50} /> : "Cadastrar"}</Button>
             </Form>
 
             <Link to='/' style={{ textDecoration: 'none', color: 'white' }}>Já tem uma conta? Entre agora!</Link>

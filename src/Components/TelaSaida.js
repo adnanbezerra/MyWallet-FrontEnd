@@ -10,16 +10,18 @@ export default function TelaSaida() {
     const { user } = useContext(UserContext);
     const [valor, setValor] = useState("");
     const [descricao, setDescricao] = useState("");
-    const data = dayjs().format("dd/mm")
 
     const navigate = useNavigate();
 
     function submitForm(event) {
         event.preventDefault();
 
+        const data = dayjs().format("DD/MM")
+        console.log(data)
+
         const token = user.token;
         const content = {
-            valor,
+            valor: parseInt(valor),
             descricao,
             tipo: "saida",
             data

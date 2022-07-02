@@ -11,6 +11,7 @@ export default function TelaExtrato() {
 
     const { user } = useContext(UserContext);
     const [balance, setBalance] = useState([]);
+    const [saldo, setSaldo] = useState(0);
 
     useEffect(() => {
         const token = user.token;
@@ -21,21 +22,25 @@ export default function TelaExtrato() {
             }
         })
             .then(response => {
-                arrangeBalanceArray([...response.data])
+                setBalance(response.data);
+                getSaldo();
+                console.log(balance);
+                console.log(saldo);
             }).catch(error => {
                 console.log(error);
             })
     }, [])
 
-    function arrangeBalanceArray(balance) {
-        for (let entry of balance) {
-            const entrance = {
-                descricao: entry.descricao,
-                data: entry.data,
-                tipo: entry.tipo,
-                valor: entry.valor
+    function getSaldo() {
+        for (let i = 0; i < balance.length; i++) {
+            if (balance[i].tipo === 'saida') {
+                const valor = balance[i].valor * -1;
+                const novoValor = saldo + valor;
+                setSaldo(novoValor);
+            } else {
+                const novoValor = saldo + balance[i].valor;
+                setSaldo(novoValor);
             }
-            setBalance([...balance, entrance])
         }
     }
 
@@ -46,18 +51,24 @@ export default function TelaExtrato() {
             headers: {
                 Authorization: `Bearer ${token}`
             }
-        }).then( response => {
+        }).then(response => {
             navigate("/");
-        }).catch( error => {
+        }).catch(error => {
             console.log(error);
         })
     }
 
     function generateBalanceDisplay() {
-        let saldo = 0;
         return (
             <Display>
-                <BalanceRow><Balance>SALDO</Balance><BalanceValue negativo={saldo<0}>{saldo}</BalanceValue></BalanceRow>
+                {balance.map(entry => {
+                    return (
+                        <ExpensesRow>
+                            <div><Data>{entry.data}</Data><Descricao>{entry.descricao}</Descricao></div>
+                            <div><Valor negativo={entry.tipo === 'saida'}>{entry.valor}</Valor></div>
+                        </ExpensesRow>)
+                })}
+                <BalanceRow><Balance>SALDO</Balance><BalanceValue negativo={saldo < 0}>{saldo}</BalanceValue></BalanceRow>
             </Display>
         )
     }
@@ -91,6 +102,30 @@ export default function TelaExtrato() {
         </Container>
     )
 }
+
+const Valor = styled.span`
+    color: ${props => props.negativo ? "#C70000" : "#03AC00"};
+    font-size: 16px;
+    font-weight: 400;
+`
+
+const Descricao = styled.span`
+    font-size: 16px;
+    font-weight: 400;
+    color: black;
+`
+
+const Data = styled.span`
+    font-size: 16px;
+    font-weight: 400;
+    color: #C6C6C6;
+    margin-right: 8px;
+`
+
+const ExpensesRow = styled.p`
+    display: flex;
+    justify-content: space-between;
+`
 
 const BalanceValue = styled.p`
     font-size: 17px;
@@ -177,6 +212,7 @@ const Display = styled.div`
     color: black;
 
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
     padding: 10px 15px;
     box-sizing: border-box;

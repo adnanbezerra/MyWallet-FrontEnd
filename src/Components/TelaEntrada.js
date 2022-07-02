@@ -10,7 +10,8 @@ export default function TelaEntrada() {
     const { user } = useContext(UserContext);
     const [valor, setValor] = useState("");
     const [descricao, setDescricao] = useState("");
-    const data = dayjs().format("dd/mm")
+    
+    const data = dayjs().format("DD/MM")
 
     const navigate = useNavigate();
 
@@ -19,7 +20,7 @@ export default function TelaEntrada() {
 
         const token = user.token;
         const content = {
-            valor,
+            valor: parseInt(valor),
             descricao,
             tipo: "entrada",
             data

@@ -2,7 +2,7 @@ import styled from "styled-components";
 import axios from "axios";
 
 import UserContext from "./contexts/UserContext";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function TelaExtrato() {
@@ -10,37 +10,73 @@ export default function TelaExtrato() {
     const navigate = useNavigate();
 
     const { user } = useContext(UserContext);
-    const [balance, setBalance] = useContext([]);
+    const [balance, setBalance] = useState([]);
 
     useEffect(() => {
         const token = user.token;
-        axios.get('/extrato', {
+
+        axios.get('http://localhost:5000/extrato', {
             headers: {
                 Authorization: `Bearer ${token}`
             }
-        }).then(response => {
-            setBalance([...response.data])
-        }).catch(error => {
-            console.log(error);
         })
+            .then(response => {
+                arrangeBalanceArray([...response.data])
+            }).catch(error => {
+                console.log(error);
+            })
     }, [])
 
-    function geraExtrato() {
+    function arrangeBalanceArray(balance) {
+        for (let entry of balance) {
+            const entrance = {
+                descricao: entry.descricao,
+                data: entry.data,
+                tipo: entry.tipo,
+                valor: entry.valor
+            }
+            setBalance([...balance, entrance])
+        }
+    }
 
+    function logOut() {
+        const token = user.token;
+
+        axios.delete('http://localhost:5000/logoff', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }).then( response => {
+            navigate("/");
+        }).catch( error => {
+            console.log(error);
+        })
+    }
+
+    function generateBalanceDisplay() {
+        let saldo = 0;
+        return (
+            <Display>
+                <BalanceRow><Balance>SALDO</Balance><BalanceValue negativo={saldo<0}>{saldo}</BalanceValue></BalanceRow>
+            </Display>
+        )
     }
 
     return (
         <Container>
             <TopRow>
                 <Hello>Olá, {user.nome}</Hello>
-                <div>
+                <div onClick={logOut}>
                     <ion-icon name="log-out-outline"></ion-icon>
                 </div>
             </TopRow>
 
-            <Display>
-                { balance.length === 0 ? "Não há registros de entrada ou saída" : <></> }
-            </Display>
+
+            {balance.length === 0 ?
+                <DisplayEmpty><P>Não há registros de entrada ou saída</P></DisplayEmpty>
+                :
+                generateBalanceDisplay()}
+
 
             <BottomRow>
                 <Button onClick={() => navigate('/entrada')}>
@@ -56,18 +92,58 @@ export default function TelaExtrato() {
     )
 }
 
-const ButtonText = styled.div`
-    width: 100%;
+const BalanceValue = styled.p`
+    font-size: 17px;
+    font-weight: 400;
+    color: ${props => props.negativo ? "#C70000" : "#03AC00"}
+`
+
+const Balance = styled.div`
+    font-size: 17px;
+    font-weight: 700;
+`
+
+const BalanceRow = styled.div`
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
+    width: 100%;
+`
+
+const P = styled.div`
+    width: 180px;
+    display: center;
+    text-align: center;
+`
+
+const DisplayEmpty = styled.div`
+    width: 90%;
+    background-color: white;
+    height: 70%;
+    border-radius: 5px;
+
+    margin-bottom: 13px;
+    margin-top: 55px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    color: #868686;
+    font-size: 20px;
+    font-weight: 400;
+`
+
+const ButtonText = styled.div`
+    width: 64px;
     font-size: 17px;
     font-weight: bold;
+    text-align: start;
 `
 
 const Button = styled.button`
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-content: space-between;
 
     width: 155px;
     height: 114px;
@@ -78,7 +154,7 @@ const Button = styled.button`
 
     border: 0;
     border-radius: 5px;
-    font-size: 20px;
+    font-size: 25px;
 
     color: white;
 `
@@ -97,6 +173,13 @@ const Display = styled.div`
 
     margin-bottom: 13px;
     margin-top: 55px;
+
+    color: black;
+
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 15px;
+    box-sizing: border-box;
 `
 
 const Hello = styled.div`
